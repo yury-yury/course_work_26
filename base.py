@@ -1,4 +1,5 @@
-from unit import BaseUnit
+from unit import BaseUnit, PlayerUnit, EnemyUnit
+
 
 class BaseSingleton(type):
     _instances = {}
@@ -17,7 +18,7 @@ class Arena(metaclass=BaseSingleton):
     game_is_running = False
     battle_resault = None
 
-    def start_game(self, player: BaseUnit, enemy: BaseUnit):
+    def start_game(self, player: PlayerUnit, enemy: EnemyUnit):
         # TODO НАЧАЛО ИГРЫ -> None
         # TODO присваиваем экземпляру класса аттрибуты "игрок" и "противник"
         # TODO а также выставляем True для свойства "началась ли игра"
@@ -60,12 +61,16 @@ class Arena(metaclass=BaseSingleton):
         # TODO если же результата пока нет и после завершения хода игра продолжается,
         # TODO тогда запускаем процесс регенирации стамины и здоровья для игроков (self._stamina_regeneration)
         # TODO и вызываем функцию self.enemy.hit(self.player) - ответный удар врага
-        result = self._check_players_hp()
-        if result is not None:
-            return result
+
         if self.game_is_running:
             self._stamina_regeneration()
-            return self.enemy.hit(self.player)
+            result = self.enemy.hit(self.player)
+
+            res = self._check_players_hp()
+            if res is not None:
+                return res
+
+            return result
 
     def _end_game(self) -> str:
         # TODO КНОПКА ЗАВЕРШЕНИЕ ИГРЫ - > return result: str
@@ -76,20 +81,34 @@ class Arena(metaclass=BaseSingleton):
         self.game_is_running = False
         return self.battle_resault
 
-    def player_hit(self):
+    def player_hit(self) -> str:
         # TODO КНОПКА УДАР ИГРОКА -> return result: str
         # TODO получаем результат от функции self.player.hit
         # TODO запускаем следующий ход
         # TODO возвращаем результат удара строкой
-        result = self.player.hit(self.enemy)
-        turn_result = self.next_turn()
-        return f'{result}\n{turn_result}'
 
-    def player_use_skill(self):
+        result = self.player.hit(self.enemy)
+
+        res = self._check_players_hp()
+        if res is not None:
+            return res
+
+        turn_result = self.next_turn()
+
+        return f'{result}<br>{turn_result}'
+
+    def player_use_skill(self) -> str:
         # TODO КНОПКА ИГРОК ИСПОЛЬЗУЕТ УМЕНИЕ
         # TODO получаем результат от функции self.use_skill
         # TODO включаем следующий ход
         # TODO возвращаем результат удара строкой
+
         result = self.player.use_skill(self.enemy)
+
+        res = self._check_players_hp()
+        if res is not None:
+            return res
+
         turn_result = self.next_turn()
-        return f'{result}\n{turn_result}'
+
+        return f'{result}<br>{turn_result}'

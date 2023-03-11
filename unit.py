@@ -38,7 +38,7 @@ class BaseUnit(ABC):
         self.armor = armor
         return f"{self.name} экипирован броней {self.armor.name}"
 
-    def _count_damage(self, target: BaseUnit) -> int:
+    def _count_damage(self, target: BaseUnit) -> float:
         # TODO Эта функция должна содержать:
         #  логику расчета урона игрока
         #  логику расчета брони цели
@@ -56,12 +56,12 @@ class BaseUnit(ABC):
         target.get_damage(damage)
         return damage
 
-    def get_damage(self, damage: int) -> Optional[int]:
+    def get_damage(self, damage: int):
         if damage > 0:
             self.hp -= damage
 
     @abstractmethod
-    def hit(self, target: BaseUnit) -> str:
+    def hit(self, target: BaseUnit):
         """
         этот метод будет переопределен ниже
         """
