@@ -1,4 +1,6 @@
-from typing import Type, Optional
+from typing import Type, Optional, Union
+
+import werkzeug
 from flask import Flask, render_template, request, redirect, url_for, Response
 
 from base import Arena
@@ -9,7 +11,7 @@ from unit import PlayerUnit, EnemyUnit, BaseUnit
 
 app: Flask = Flask(__name__)
 
-heroes: dict[str, Optional[PlayerUnit, EnemyUnit]] = {"player": ..., "enemy": ...}
+heroes: dict[str, Union[PlayerUnit, EnemyUnit, ellipsis]] = {"player": ..., "enemy": ...}
 
 arena: Arena =  Arena()
 
@@ -86,7 +88,7 @@ def end_fight() -> str:
 
 
 @app.route("/choose-hero/", methods=['post', 'get'])
-def choose_hero() -> Optional[str, Response]:
+def choose_hero() -> Union[str, Response]:
     """
     The view processes GET and POST requests at the address "/fight/choose-hero", is a form of selecting
     a character class and its equipment, with a POST request, data is stored and the transition
@@ -118,7 +120,7 @@ def choose_hero() -> Optional[str, Response]:
 
 
 @app.route("/choose-enemy/", methods=['post', 'get'])
-def choose_enemy() -> Optional[str, Response]:
+def choose_enemy() -> Union[str, werkzeug.wrappers.response.Response]:
     """
     The view processes GET and POST requests at the address "/fight/choose-enimy", is a form of selecting
     a character class and its equipment, with a POST request, data is stored and the transition
@@ -129,12 +131,10 @@ def choose_enemy() -> Optional[str, Response]:
         equipment = Equipment()
         weapons = equipment.get_weapons_names()
         armors = equipment.get_armors_names()
-        result = {
-            'header': header,
-            'weapons': weapons,
-            'armors': armors,
-            'classes': unit_classes
-        }
+        result: dict[str, Union[str, list]] = {'header': header,
+                                               'weapons': weapons,
+                                               'armors': armors,
+                                               'classes': unit_classes }
         return render_template('hero_choosing.html', result=result)
 
     if request.method == 'POST':

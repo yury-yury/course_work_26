@@ -5,6 +5,10 @@ from skills import FuryPunch, HardShot, Skill
 
 @dataclass
 class UnitClass:
+    """
+    The UnitClass class is a dataclass that contains a set of arguments for defining game characters
+    as instances of the class.
+    """
     name: str
     max_health: float
     max_stamina: float
@@ -14,7 +18,7 @@ class UnitClass:
     skill: Skill
 
 
-WarriorClass = UnitClass(
+WarriorClass: UnitClass = UnitClass(
     name = 'Воин',
     max_health = 60,
     max_stamina = 30,
@@ -24,7 +28,7 @@ WarriorClass = UnitClass(
     skill = FuryPunch()
 )
 
-ThiefClass = UnitClass(
+ThiefClass: UnitClass = UnitClass(
     name = 'Вор',
     max_health = 50,
     max_stamina = 25,

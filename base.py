@@ -1,4 +1,6 @@
-from unit import BaseUnit, PlayerUnit, EnemyUnit
+from typing import Optional
+
+from unit import PlayerUnit, EnemyUnit
 
 
 class BaseSingleton(type):
@@ -12,26 +14,35 @@ class BaseSingleton(type):
 
 
 class Arena(metaclass=BaseSingleton):
-    STAMINA_PER_ROUND = 1
-    player = None
-    enemy = None
-    game_is_running = False
-    battle_resault = None
+    """
+    The Arena class implements the interaction of all game objects, and contains the basic logic.
+    When initializing the class object, it determines the initial values of the arguments,
+    does not accept any parameters.
+    """
+    STAMINA_PER_ROUND: float = 1
+    player: PlayerUnit = ...
+    enemy: EnemyUnit = ...
+    game_is_running: bool = False
+    battle_resault: Optional[str] = None
 
     def start_game(self, player: PlayerUnit, enemy: EnemyUnit):
-        # TODO НАЧАЛО ИГРЫ -> None
-        # TODO присваиваем экземпляру класса аттрибуты "игрок" и "противник"
-        # TODO а также выставляем True для свойства "началась ли игра"
+        """
+        The start_game function defines a method of the Arena class, when called, it takes as arguments
+        a player and an opponent in the form of objects of classes inherited from the abstract BaseUnit class.
+        When called, it assigns the attributes "player" and "opponent" to the instance of the class,
+        and also sets True for the "has the game started" property.
+        """
         self.player = player
         self.enemy = enemy
         self.game_is_running = True
 
-    def _check_players_hp(self):
-        # TODO ПРОВЕРКА ЗДОРОВЬЯ ИГРОКА И ВРАГА
-        # TODO проверка здоровья игрока и врага и возвращение результата строкой:
-        # TODO может быть три результата:
-        # TODO Игрок проиграл битву, Игрок выиграл битву, Ничья и сохраняем его в аттрибуте (self.battle_result)
-        # TODO если Здоровья игроков в порядке то ничего не происходит
+    def _check_players_hp(self) -> Optional[str]:
+        """
+        The _check_players_hp function defines a protected method of the Arena class, does not accept
+        arguments when called. Checks the hp attribute values of the player and the opponent.
+        Based on the results of the check, it returns None if both values are greater than zero,
+        otherwise it determines the outcome of the battle and calls the _end_game method.
+        """
         if self.player.hp > 0 and self.enemy.hp > 0:
             return None
         if self.player.hp <= 0 and self.enemy.hp <= 0:
@@ -43,9 +54,11 @@ class Arena(metaclass=BaseSingleton):
         self._end_game()
 
     def _stamina_regeneration(self):
-        # TODO регенерация здоровья и стамины для игрока и врага за ход
-        # TODO в этом методе к количеству стамины игрока и врага прибавляется константное значение.
-        # TODO главное чтобы оно не привысило максимальные значения (используйте if)
+        """
+        The _stamina_regeneration function defines a protected method of the Arena class, does not accept
+        arguments when called. Increases the values of stamina attributes of player and opponent objects.
+        Checks that the values do not exceed the maximum value.
+        """
         units = (self.player, self.enemy)
         for unit in units:
             if unit.stamina + self.STAMINA_PER_ROUND > unit.unit_class.max_stamina:
@@ -54,14 +67,12 @@ class Arena(metaclass=BaseSingleton):
                 unit.stamina += self.STAMINA_PER_ROUND
 
     def next_turn(self):
-        # TODO СЛЕДУЮЩИЙ ХОД -> return result | return self.enemy.hit(self.player)
-        # TODO срабатывает когда игроп пропускает ход или когда игрок наносит удар.
-        # TODO создаем поле result и проверяем что вернется в результате функции self._check_players_hp
-        # TODO если result -> возвращаем его
-        # TODO если же результата пока нет и после завершения хода игра продолжается,
-        # TODO тогда запускаем процесс регенирации стамины и здоровья для игроков (self._stamina_regeneration)
-        # TODO и вызываем функцию self.enemy.hit(self.player) - ответный удар врага
-
+        """
+        The next_turn function defines a method of the Arena class, does not accept arguments when called.
+        It is called when the player performs some action, Checks the value returned by the _check_players_hp method,
+        if the method returned the result, it returns it, Otherwise it calls the _stamina_regeneration method,
+        and then enemy.hit with passing to it as an argument an instance of the player to perform a response move.
+        """
         if self.game_is_running:
             self._stamina_regeneration()
             result = self.enemy.hit(self.player)
@@ -73,20 +84,20 @@ class Arena(metaclass=BaseSingleton):
             return result
 
     def _end_game(self) -> str:
-        # TODO КНОПКА ЗАВЕРШЕНИЕ ИГРЫ - > return result: str
-        # TODO очищаем синглтон - self._instances = {}
-        # TODO останавливаем игру (game_is_running)
-        # TODO возвращаем результат
-        self._instances = {}
+        """
+        The _end_game function defines a protected method of the Arena class, does not accept arguments when called.
+        Cleans singleton, stops the game and returns the result of the battle.
+        """
+        self._instances: dict = {}
         self.game_is_running = False
         return self.battle_resault
 
     def player_hit(self) -> str:
-        # TODO КНОПКА УДАР ИГРОКА -> return result: str
-        # TODO получаем результат от функции self.player.hit
-        # TODO запускаем следующий ход
-        # TODO возвращаем результат удара строкой
-
+        """
+        The player_hit function defines a method of the Arena class, does not accept arguments when called.
+        Retrieves the result of the player.hit function, starts the next move and returns
+        the result of the player's action.
+        """
         result = self.player.hit(self.enemy)
 
         res = self._check_players_hp()
@@ -98,11 +109,11 @@ class Arena(metaclass=BaseSingleton):
         return f'{result}<br>{turn_result}'
 
     def player_use_skill(self) -> str:
-        # TODO КНОПКА ИГРОК ИСПОЛЬЗУЕТ УМЕНИЕ
-        # TODO получаем результат от функции self.use_skill
-        # TODO включаем следующий ход
-        # TODO возвращаем результат удара строкой
-
+        """
+        The player_use_skill function defines a method of the Arena class, does not accept arguments when called.
+        Retrieves the result of the player.use_skill function, starts the next move and returns
+        the result of the player's action.
+        """
         result = self.player.use_skill(self.enemy)
 
         res = self._check_players_hp()
